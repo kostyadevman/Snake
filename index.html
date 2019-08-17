@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Snake</title>
+    <canvas id="snake" width="512" height="512"></canvas>
+    <script>
+            const CELL_SIZE = 32,
+                COLS = 16,
+                ROWS = 16;
+            // directions
+            let d = 2;
+
+            let cnv = document.getElementById("snake"),
+            ctx     = cnv.getContext('2d');
+
+
+            // Обрабатываем событие нажатия стрелок
+           document.addEventListener("keydown", function(event) {
+              if ( event.code === 'ArrowLeft' && d !== 2 ) { d = 1 };
+              if ( event.code === 'ArrowRight' && d !== 1 ) { d = 2};
+              if ( event.code === 'ArrowUp' && d !== 4 ) { d = 3 };
+              if ( event.code === 'ArrowDown' && d !== 3 ) { d = 4 };
+            })
+
+            function move(direction, el) {
+                if ( d === 1 ) { el.x -= 1 };
+                if ( d === 2 ) { el.x += 1 };
+                if ( d === 3 ) { el.y -= 1 };
+                if ( d === 4 ) { el.y += 1 };
+                // Выход ха границы
+                if ( el.x < 0 ) { el.x = COLS - 1};
+                if ( el.x > ROWS - 1 ) { el.x = 0 };
+                if ( el.y < 0 ) { el.y = ROWS - 1};
+                if ( el.y > COLS - 1) { el.y = 0 };
+                return {x: el.x, y: el.y};
+
+            }
+
+            function randomInteger(min, max) {
+              // случайное число от min до (max+1)
+              let rand = min + Math.random() * (max + 1 - min);
+              return Math.floor(rand);
+            }
+
+            function getApple() {
+                return {x: randomInteger(0, COLS - 1) , y: randomInteger(0, ROWS - 1)};
+            }
+
+            function getSnake() {
+                return  [{x: randomInteger(0, COLS - 1) , y: randomInteger(0, ROWS - 1)}];
+            }
+
+
+            let snake = getSnake();
+            let apple = getApple();
+            let head = snake[0];
+
+			setInterval(function () {
+			    ctx.clearRect(0, 0, cnv.width, cnv.height);
+                ctx.strokeRect(0, 0, cnv.width, cnv.height);
+
+                // Отрисовываем яблоко
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(apple.x * CELL_SIZE, apple.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+
+                // Отрисовываем змейку
+                ctx.fillStyle = '#00FF00';
+                snake.forEach(function (el, i) {
+                    ctx.fillRect(el.x * CELL_SIZE, el.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+
+                    // Столкновение
+                    if ( i != 0 ) {
+                        if ( head.x === el.x && head.y === el.y ) {
+                            // Game over !!!
+                            console.log('Game over!!');
+                            snake = getSnake();
+                            apple = getApple();
+                        }
+                    }
+                })
+
+                // змейка съела яблоко
+                if (head.x === apple.x && head.y === apple.y) {
+                     apple = getApple();
+                } else {
+                    // Удоляем последний эл.
+                    snake.pop();
+                }
+                oldHead = head;
+                newHead = move(d, head);
+                // Добавлям в начало со сдвигом всех эл.
+                snake.unshift(newHead);
+                // Столкновение
+            }, 150);
+
+    </script>
+</head>
+<body>
+
+</body>
+</html>
